@@ -202,16 +202,38 @@ Provide an intuitive, accessible, and efficient navigation system for users to:
 - **Text Externalization:** All labels in translation files
 - **RTL Support:** Prepare for right-to-left languages
 - **Dynamic Loading:** Load translations based on user preference
+- **Library:** next-intl or react-i18next
 
 ### NFR-6: Theming
 - **Light/Dark Mode:** Automatic switching based on system preference
 - **Custom Themes:** Support for branded themes (enterprise)
 - **CSS Variables:** Use CSS custom properties for colors
+- **Integration:** next-themes with shadcn/ui theme provider
 
 ### NFR-7: Analytics
 - **Event Tracking:** Track menu item clicks
 - **Popular Items:** Identify most-used navigation paths
 - **Error Logging:** Monitor failed navigation attempts
+
+### NFR-8: Payment & Subscription Integration
+- **Stripe Integration:**
+  - Sync subscription status from Stripe webhooks to Supabase `subscriptions` table
+  - Handle subscription upgrades/downgrades/cancellations
+  - Customer portal access for billing management
+  - Trial period tracking and expiration notifications
+- **PayPal Integration:**
+  - Process one-time payments and subscriptions
+  - IPN (Instant Payment Notification) handling
+  - Webhook verification for payment events
+  - Refund processing support
+- **Feature Gating:**
+  - Hide/show menu items based on subscription tier (Free, Pro, Business, Enterprise)
+  - Real-time feature availability checks via Supabase Edge Functions
+  - Upgrade prompts for locked features
+- **Security:**
+  - Server-side validation of subscription status
+  - Webhook signature verification
+  - Idempotency keys for payment processing
 
 ---
 
@@ -486,196 +508,378 @@ Sidebar
 
 ## 10. Implementation Stages
 
-### Stage 1: Foundation (Week 1)
-**Objective:** Establish core sidebar structure and basic functionality
+### Stage 1: Foundation & Setup (Week 1)
+**Objective:** Establish core sidebar structure with Next.js, shadcn/ui, and Supabase integration
 
 **Tasks:**
-- [ ] Set up HTML structure with semantic markup
-- [ ] Implement CSS styling with Bootstrap utilities
-- [ ] Integrate Feather Icons library
+- [ ] Initialize Next.js 14+ project with App Router and TypeScript
+- [ ] Install and configure shadcn/ui components (Sheet, Collapsible, Tooltip)
+- [ ] Set up Tailwind CSS with custom theme configuration
+- [ ] Install Lucide React icons (Feather icons replacement)
+- [ ] Configure Supabase client and authentication
+- [ ] Set up next-themes for dark/light mode support
 - [ ] Create static navigation items (all 18 menu items)
 - [ ] Implement section headers (Channels, Link Management)
-- [ ] Add brand logo with dual-theme support
-- [ ] Set up SimpleBar for scrolling
+- [ ] Add brand logo with dual-theme support (stored in Supabase Storage)
+- [ ] Set up SimpleBar or native smooth scrolling
+- [ ] Create base sidebar component structure
 
 **Deliverables:**
-- Static sidebar with all menu items
+- Next.js project initialized with all dependencies
+- Static sidebar with all menu items rendered
 - Basic styling matching design mockups
-- Icon integration complete
+- Icon integration complete with Lucide React
+- Supabase connection established
 
 **Success Metrics:**
 - All menu items render correctly
-- Logos display properly
+- Logos display properly in both themes
 - No console errors
+- Supabase health check passes
 
 ---
 
-### Stage 2: Interactivity (Week 2)
-**Objective:** Add dynamic behavior and state management
+### Stage 2: Interactivity & State Management (Week 2)
+**Objective:** Add dynamic behavior, state management, and routing integration
 
 **Tasks:**
-- [ ] Implement active state detection and highlighting
-- [ ] Create collapsible dropdown for "Tools" section
-- [ ] Add smooth animations for expand/collapse (CSS transitions)
-- [ ] Implement sidebar toggle (collapse/expand)
-- [ ] Add state persistence to localStorage
-- [ ] Handle route changes and update active state
-- [ ] Add tooltip support for collapsed state
+- [ ] Implement active state detection using Next.js `usePathname()` hook
+- [ ] Create collapsible dropdown for "Tools" section using shadcn Collapsible
+- [ ] Add smooth animations with Framer Motion (200-300ms transitions)
+- [ ] Implement sidebar toggle (collapse/expand) with Zustand store
+- [ ] Add state persistence to localStorage and Supabase `user_preferences`
+- [ ] Handle route changes and update active state automatically
+- [ ] Add tooltip support for collapsed state using shadcn Tooltip
+- [ ] Implement mobile drawer using shadcn Sheet component
+- [ ] Create sidebar context provider for global state
 
 **Deliverables:**
-- Fully interactive sidebar
+- Fully interactive sidebar with smooth animations
 - Active state works across all pages
 - Dropdown functionality operational
 - Collapse/expand feature working
+- Mobile drawer functional
 
 **Success Metrics:**
-- Active state updates on navigation
-- Dropdown toggles smoothly
+- Active state updates on navigation instantly
+- Dropdown toggles smoothly at 60fps
 - Collapse state persists on reload
 - Animation performance ≥ 60fps
+- No layout shifts during interactions
 
 ---
 
-### Stage 3: Responsiveness (Week 3)
-**Objective:** Ensure optimal experience across all devices
+### Stage 3: Supabase Integration & Authentication (Week 3)
+**Objective:** Deep integration with Supabase for user data and preferences
 
 **Tasks:**
-- [ ] Implement mobile breakpoint (< 768px)
-- [ ] Create off-canvas drawer for mobile
-- [ ] Add hamburger menu trigger
+- [ ] Create Supabase database schema for user preferences
+- [ ] Implement user authentication flow with Supabase Auth
+- [ ] Fetch user preferences from `user_preferences` table on load
+- [ ] Save sidebar collapse state to Supabase on change
+- [ ] Implement real-time sync for preferences across devices
+- [ ] Create Edge Function for server-side preference validation
+- [ ] Add error handling and loading states
+- [ ] Implement optimistic updates for better UX
+- [ ] Set up Row Level Security (RLS) policies
+
+**Database Schema:**
+```sql
+-- User Preferences Table
+CREATE TABLE user_preferences (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  sidebar_collapsed BOOLEAN DEFAULT false,
+  expanded_menus TEXT[] DEFAULT '{}',
+  theme_preference TEXT DEFAULT 'system',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE user_preferences ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Users can only access their own preferences
+CREATE POLICY "Users can access own preferences"
+  ON user_preferences
+  FOR ALL
+  USING (auth.uid() = user_id);
+```
+
+**Deliverables:**
+- Complete Supabase integration
+- User preferences synced to database
+- Real-time updates working
+- Authentication flow complete
+
+**Success Metrics:**
+- Preferences load within 100ms
+- Changes sync across devices in real-time
+- RLS policies prevent unauthorized access
+- Zero authentication errors
+
+---
+
+### Stage 4: Stripe & PayPal Integration (Week 4)
+**Objective:** Implement payment processing and subscription management
+
+**Tasks:**
+- [ ] Set up Stripe account and configure products/prices
+- [ ] Install Stripe SDK and configure Next.js API routes
+- [ ] Create subscription checkout flow with Stripe Checkout
+- [ ] Implement Stripe webhooks handler (Edge Function)
+- [ ] Sync subscription status to Supabase `subscriptions` table
+- [ ] Set up PayPal Business account
+- [ ] Integrate PayPal SDK for payments
+- [ ] Implement PayPal IPN/Webhook handling
+- [ ] Create subscription tiers mapping (Free, Pro, Business, Enterprise)
+- [ ] Implement feature gating based on subscription tier
+- [ ] Add customer portal access (Stripe Billing Portal)
+- [ ] Create upgrade/downgrade flows
+- [ ] Handle trial periods and expiration notifications
+
+**Database Schema:**
+```sql
+-- Subscriptions Table
+CREATE TABLE subscriptions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  stripe_subscription_id TEXT UNIQUE,
+  paypal_subscription_id TEXT UNIQUE,
+  tier TEXT NOT NULL CHECK (tier IN ('free', 'pro', 'business', 'enterprise')),
+  status TEXT NOT NULL CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'unpaid')),
+  current_period_start TIMESTAMP WITH TIME ZONE,
+  current_period_end TIMESTAMP WITH TIME ZONE,
+  cancel_at_period_end BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- User Features Table (for feature gating)
+CREATE TABLE user_features (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  feature_key TEXT NOT NULL,
+  enabled BOOLEAN DEFAULT false,
+  metadata JSONB,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_features ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+CREATE POLICY "Users can view own subscription"
+  ON subscriptions
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own features"
+  ON user_features
+  FOR SELECT
+  USING (auth.uid() = user_id);
+```
+
+**API Routes:**
+- `POST /api/stripe/checkout` - Create checkout session
+- `POST /api/stripe/webhook` - Handle Stripe webhooks
+- `POST /api/paypal/webhook` - Handle PayPal webhooks
+- `GET /api/subscription/status` - Get current subscription status
+- `POST /api/subscription/cancel` - Cancel subscription
+- `GET /api/features` - Get available features for user
+
+**Deliverables:**
+- Stripe payment flow fully functional
+- PayPal payment flow fully functional
+- Subscription status synced to Supabase
+- Feature gating implemented in sidebar
+- Customer portal accessible
+
+**Success Metrics:**
+- Payment processing success rate > 98%
+- Webhooks processed within 5 seconds
+- Feature gates update in real-time after payment
+- Zero payment-related security issues
+
+---
+
+### Stage 5: Role-Based Access & Feature Gating (Week 5)
+**Objective:** Implement dynamic menu visibility based on user roles and subscriptions
+
+**Tasks:**
+- [ ] Create middleware for route protection
+- [ ] Implement feature flag system using Supabase Edge Functions
+- [ ] Hide/show menu items based on subscription tier
+- [ ] Add "Upgrade" badges to locked features
+- [ ] Create upgrade modal/tooltip for premium features
+- [ ] Implement team-based permissions (for Teams feature)
+- [ ] Add admin-only menu items detection
+- [ ] Create A/B testing framework for feature rollouts
+- [ ] Implement soft locks (clickable but shows upgrade prompt)
+- [ ] Add analytics for feature usage by tier
+
+**Feature Mapping Example:**
+```typescript
+const featureAccess = {
+  free: ['dashboard', 'links', 'basic-stats'],
+  pro: ['dashboard', 'links', 'advanced-stats', 'qr-codes', 'campaigns', 'custom-splash'],
+  business: ['dashboard', 'links', 'advanced-stats', 'qr-codes', 'campaigns', 'custom-splash', 'branded-domains', 'teams'],
+  enterprise: ['all']
+};
+```
+
+**Deliverables:**
+- Dynamic menu rendering based on subscription
+- Upgrade prompts for locked features
+- Team permissions working
+- Feature usage analytics
+
+**Success Metrics:**
+- Menu items correctly hidden/shown for each tier
+- Upgrade conversion rate tracked
+- Zero unauthorized feature access
+- Team members see correct permissions
+
+---
+
+### Stage 6: Responsiveness & Accessibility (Week 6)
+**Objective:** Ensure optimal experience across all devices and WCAG 2.1 AA compliance
+
+**Tasks:**
+- [ ] Implement mobile breakpoint (< 768px) with shadcn Sheet
+- [ ] Create off-canvas drawer for mobile with backdrop overlay
+- [ ] Add hamburger menu trigger in top navigation
 - [ ] Implement tablet optimizations (768-1024px)
-- [ ] Test on various devices and orientations
+- [ ] Test on various devices and orientations (iOS, Android)
 - [ ] Add touch gesture support (swipe to close)
-- [ ] Optimize scrollbar for touch devices
+- [ ] Add ARIA labels to all interactive elements
+- [ ] Implement proper focus management and trapping
+- [ ] Ensure color contrast ratios meet WCAG AA standards
+- [ ] Test with screen readers (NVDA, VoiceOver, JAWS)
+- [ ] Add keyboard navigation support (Tab, Enter, Escape, Arrow keys)
+- [ ] Implement reduced motion support via CSS media query
+- [ ] Add skip navigation link
+
+**Responsive Breakpoints:**
+```typescript
+// Tailwind config
+breakpoints: {
+  'sm': '640px',   // Mobile landscape
+  'md': '768px',   // Tablet
+  'lg': '1024px',  // Desktop
+  'xl': '1280px',  // Large desktop
+  '2xl': '1536px'  // Extra large
+}
+```
 
 **Deliverables:**
 - Responsive sidebar working on all screen sizes
-- Mobile drawer with overlay
-- Touch-friendly interactions
+- Mobile drawer with overlay and gestures
+- Touch-friendly interactions (min 44x44px tap targets)
+- Full accessibility compliance
 
 **Success Metrics:**
-- Passes responsive design testing on 5+ devices
+- Passes responsive design testing on 10+ devices
 - No layout issues at any breakpoint
 - Touch interactions feel natural
-
----
-
-### Stage 4: Accessibility (Week 4)
-**Objective:** Achieve WCAG 2.1 AA compliance
-
-**Tasks:**
-- [ ] Add ARIA labels to all interactive elements
-- [ ] Implement proper focus management
-- [ ] Add skip navigation link
-- [ ] Ensure color contrast ratios meet standards
-- [ ] Test with screen readers (NVDA, VoiceOver)
-- [ ] Add keyboard navigation support
-- [ ] Implement focus trapping in mobile drawer
-- [ ] Add reduced motion support
-
-**Deliverables:**
-- Accessibility audit report
-- All critical accessibility issues resolved
-- Keyboard navigation fully functional
-
-**Success Metrics:**
-- Passes automated accessibility testing (axe, Lighthouse)
+- Passes automated accessibility testing (axe, Lighthouse ≥ 95)
 - Manual screen reader testing successful
 - Keyboard-only navigation complete
 
 ---
 
-### Stage 5: Advanced Features (Week 5)
-**Objective:** Enhance user experience with premium features
+### Stage 7: Advanced Features & Optimization (Week 7)
+**Objective:** Enhance user experience with premium features and optimize performance
 
 **Tasks:**
-- [ ] Implement search functionality
-- [ ] Add quick actions panel
-- [ ] Create favorites/bookmarks system
-- [ ] Add recently visited pages
-- [ ] Implement drag-and-drop reordering (for future)
-- [ ] Add notification badges (if applicable)
-- [ ] Create onboarding tour for new users
+- [ ] Implement search functionality using shadcn Command (cmdk)
+- [ ] Add Cmd+K keyboard shortcut for quick navigation
+- [ ] Create quick actions panel (Create Link, Generate QR)
+- [ ] Add recently visited pages (last 5, stored in Supabase)
+- [ ] Implement notification badges with Supabase Realtime
+- [ ] Add favorites/bookmarks system
+- [ ] Create onboarding tour for new users (using Driver.js or Intro.js)
+- [ ] Optimize bundle size with code splitting and lazy loading
+- [ ] Implement React Query for server state caching
+- [ ] Add skeleton loaders for loading states
+- [ ] Performance profiling with Next.js built-in tools
+- [ ] Implement error boundaries and fallback UI
+- [ ] Add analytics event tracking (menu clicks, feature usage)
+
+**Performance Budget:**
+- Initial load: < 200ms
+- Interaction latency: < 50ms
+- Bundle size: < 100KB (gzipped) for sidebar components
+- First Contentful Paint: < 1.5s
+- Time to Interactive: < 3s
 
 **Deliverables:**
 - Search working with real-time filtering
-- Quick actions accessible
+- Quick actions accessible via button and keyboard
 - Recent pages history maintained
-
-**Success Metrics:**
-- Search returns relevant results in < 100ms
-- Quick actions reduce time to common tasks by 30%
-
----
-
-### Stage 6: Integration & Optimization (Week 6)
-**Objective:** Connect to backend and optimize performance
-
-**Tasks:**
-- [ ] Integrate with user preferences API
-- [ ] Fetch dynamic menu configuration
-- [ ] Implement feature flag-based visibility
-- [ ] Add analytics event tracking
-- [ ] Optimize bundle size (code splitting, lazy loading)
-- [ ] Implement error boundaries
-- [ ] Add loading states and skeletons
-- [ ] Performance profiling and optimization
-
-**Deliverables:**
-- Backend integration complete
+- Notification badges showing real-time counts
 - Performance budget met
 - Analytics tracking implemented
 
 **Success Metrics:**
+- Search returns relevant results in < 100ms
+- Quick actions reduce time to common tasks by 30%
 - Sidebar loads in < 200ms
-- Bundle size < 50KB gzipped
+- Bundle size < 100KB gzipped
 - All analytics events firing correctly
+- Core Web Vitals in green zone
 
 ---
 
-### Stage 7: Testing & QA (Week 7)
-**Objective:** Ensure quality and reliability
+### Stage 8: Testing, QA & Deployment (Week 8)
+**Objective:** Ensure quality, reliability, and successful production launch
 
 **Tasks:**
-- [ ] Write unit tests for components
-- [ ] Create integration tests
-- [ ] Perform cross-browser testing
-- [ ] Conduct user acceptance testing (UAT)
-- [ ] Fix identified bugs
+- [ ] Write unit tests with Jest and React Testing Library
+- [ ] Create integration tests for critical user flows
+- [ ] Perform cross-browser testing (Chrome, Firefox, Safari, Edge)
+- [ ] Conduct user acceptance testing (UAT) with beta users
+- [ ] Fix identified bugs and regressions
 - [ ] Performance regression testing
-- [ ] Security audit
-- [ ] Documentation completion
-
-**Deliverables:**
-- Test coverage report (> 80%)
-- Bug fix list
-- User documentation
-- Technical documentation
-
-**Success Metrics:**
-- Zero critical bugs
-- All tests passing
-- UAT sign-off from stakeholders
-
----
-
-### Stage 8: Deployment & Monitoring (Week 8)
-**Objective:** Launch and monitor in production
-
-**Tasks:**
+- [ ] Security audit (OWASP Top 10)
+- [ ] Load testing for webhook handlers
 - [ ] Deploy to staging environment
 - [ ] Conduct final stakeholder review
-- [ ] Deploy to production (canary release)
-- [ ] Monitor error rates and performance
-- [ ] Gather user feedback
-- [ ] Create iteration backlog
-- [ ] Plan Phase 2 features
+- [ ] Deploy to production (canary release with 10% traffic)
+- [ ] Monitor error rates with Sentry/LogRocket
+- [ ] Set up performance monitoring with Vercel Analytics
+- [ ] Gather user feedback via in-app surveys
+- [ ] Create iteration backlog for Phase 2
+- [ ] Complete technical documentation
+- [ ] Create user guides and video tutorials
+
+**Testing Coverage Goals:**
+- Unit tests: > 80% coverage
+- Integration tests: All critical paths
+- E2E tests: Key user journeys (Playwright/Cypress)
+
+**Monitoring Setup:**
+- Error tracking: Sentry
+- Performance: Vercel Analytics, Web Vitals
+- Logs: Supabase Logs, Logtail
+- Uptime: UptimeRobot or Pingdom
 
 **Deliverables:**
 - Production deployment
+- Comprehensive test suite
 - Monitoring dashboard
 - User feedback report
+- Technical documentation
 - Phase 2 roadmap
+
+**Success Metrics:**
+- Zero critical bugs in production
+- All tests passing (CI/CD pipeline)
+- UAT sign-off from stakeholders
+- Error rate < 0.1%
+- User satisfaction score > 4.5/5
+- Performance metrics within budget
 
 **Success Metrics:**
 - No increase in error rate post-deployment
