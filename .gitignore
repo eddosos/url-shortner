@@ -1,1 +1,18 @@
-Nothing should be ignored since only a markdown file (PRD_USER_SIDEBAR.md) was added, which is a source/config file.
+```
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Original rules preserved
+*.log
+```
