@@ -1,1 +1,1 @@
-Nothing needs to be added to .gitignore since only a markdown file (PRD_ADMIN_SIDEBAR.md) was added, which is a source/config file and should not be ignored.
+Nothing should be ignored since only a markdown file (PRD_USER_SIDEBAR.md) was added, which is a source/config file.
