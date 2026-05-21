@@ -408,25 +408,77 @@ Sidebar Navigation
 
 ### 7.1 Frontend Architecture
 
-#### 7.1.1 Technology Stack
+#### 7.1.1 Technology Stack (Unified with User Dashboard)
 ```
-Recommended Stack Options:
-
-Option A: Modern JavaScript
-- Framework: React 18+ / Vue 3 / Angular 15+
-- State Management: Redux/Zustand (React) or Pinia (Vue)
-- Styling: Tailwind CSS / SCSS Modules
-- Icons: Feather Icons / Heroicons / FontAwesome
-- Animation: Framer Motion / GSAP
-
-Option B: Vanilla JavaScript
-- Framework: None (lightweight)
-- Dependencies: Bootstrap 5.x (for collapse functionality)
-- Icons: Feather Icons (SVG inline)
-- Styling: Custom CSS with CSS Variables
+Core Stack:
+- Framework: Next.js 14+ (App Router) with Server Components
+- UI Library: shadcn/ui + Radix UI primitives
+- Styling: Tailwind CSS + CSS Variables for theming
+- State Management: Zustand (client) + React Query (server state)
+- Animations: Framer Motion
+- Icons: Lucide React
+- Forms: React Hook Form + Zod validation
+- Micro-frontend Ready: Module Federation support for future service splitting
 ```
 
-#### 7.1.2 Component Structure
+#### 7.1.2 Backend Architecture (Microservices-Ready)
+```
+Core Platform:
+- Database: Supabase (PostgreSQL, Auth, Storage, Realtime)
+- API Layer: Next.js API Routes (initial) → Ready for migration to:
+  * Node.js/Express services for link management
+  * Python/FastAPI services for analytics/QR generation
+  * Go services for high-throughput redirect handling
+- Event Bus: Supabase Realtime → Future migration to Apache Kafka/RabbitMQ
+- Service Communication: REST (initial) → gRPC for inter-service calls at scale
+- Containerization: Docker-ready structure for each future microservice
+- Orchestration: Kubernetes-ready deployment configurations
+```
+
+#### 7.1.3 Payments Integration
+```
+Payment Providers:
+- Stripe: Subscription management, webhooks, customer portal
+- PayPal: One-time payments, subscription backup
+- Architecture: Payment Service abstraction layer for easy provider switching
+- Webhooks: Dedicated handlers ready for separation into payment microservice
+- Subscription Sync: Event-driven architecture for state updates
+```
+
+#### 7.1.4 Database Scalability
+```
+Database Strategy:
+- Primary: PostgreSQL (via Supabase)
+- Sharding: Prepared for horizontal sharding by user_id/tenant_id
+- Read Replicas: Configuration ready for analytics queries
+- Caching: Redis integration ready for session/cache management
+- Time-Series: Migration path to TimescaleDB for analytics data
+```
+
+#### 7.1.5 Infrastructure & DevOps
+```
+Infrastructure:
+- Hosting: Vercel (initial) → AWS/GCP migration ready
+- CDN: Edge caching for static assets and redirects
+- Load Balancing: NGINX/ALB configuration ready
+- Monitoring: Prometheus + Grafana ready structure
+- Logging: Structured logging for ELK/Loki aggregation
+- CI/CD: GitHub Actions with multi-service pipelines
+- Feature Flags: Unleash/LaunchDarkly ready
+```
+
+#### 7.1.6 Scalability Patterns
+```
+Implemented Patterns:
+- Domain-Driven Design (DDD): Bounded contexts for Links, Users, Analytics, Payments
+- Event Sourcing Ready: Audit logs structured for event replay
+- CQRS Preparation: Separate read/write models for high-traffic endpoints
+- Circuit Breakers: Ready for external service calls
+- Rate Limiting: Token bucket algorithm for distributed deployment
+- Connection Pooling: PgBouncer configuration included
+```
+
+#### 7.1.7 Component Structure
 ```
 Sidebar/
 ├── Sidebar.jsx (main container)
