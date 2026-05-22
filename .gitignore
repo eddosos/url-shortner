@@ -19,33 +19,32 @@ out/
 *.swp
 *.swo
 
-# Python
+# Logs
+*.log
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Python specific
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
-env/
-venv/
-.venv/
-pip-log.txt
-pip-delete-this-directory.txt
 *.so
-.Python
-.pytest_cache/
-.mypy_cache/
-.coverage
-htmlcov/
+*.egg-info/
+.eggs/
 
-# Logs
-*.log
-
-# OS generated files
+# Temporary files
+*.tmp
+*.temp
+*~
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
+Thumbs.db
+
+# System files
+.DS_Store
 Thumbs.db
 ```
