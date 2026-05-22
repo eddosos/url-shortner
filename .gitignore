@@ -2,19 +2,16 @@
 # Dependencies
 node_modules/
 
-# Environment variables
-.env
-.env.local
-.env.*
-
 # Build outputs
 dist/
 build/
 .next/
 out/
 
-# Logs
-*.log
+# Environment variables
+.env
+.env.local
+.env.*
 
 # IDE files
 .vscode/
@@ -22,18 +19,33 @@ out/
 *.swp
 *.swo
 
-# Python cache (if any Python files present)
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Coverage reports
-coverage/
-htmlcov/
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
 .coverage
+htmlcov/
+
+# Logs
+*.log
 
 # OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 ```
