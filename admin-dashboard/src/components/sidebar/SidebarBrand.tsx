@@ -5,11 +5,15 @@ import { cn } from '@/lib/utils'
 
 interface SidebarBrandProps {
   collapsed?: boolean
+  mode?: 'admin' | 'user'
 }
 
-export function SidebarBrand({ collapsed = false }: SidebarBrandProps) {
+export function SidebarBrand({ collapsed = false, mode = 'admin' }: SidebarBrandProps) {
+  const dashboardHref = mode === 'admin' ? '/admin/dashboard' : '/dashboard'
+  const subtitle = mode === 'admin' ? 'Admin Panel' : 'User Dashboard'
+  
   return (
-    <Link href="/admin/dashboard" className="sidebar-brand flex items-center gap-2 p-4">
+    <Link href={dashboardHref} className="sidebar-brand flex items-center gap-2 p-4">
       <div className={cn(
         "flex items-center justify-center w-10 h-10 rounded-lg bg-primary text-primary-foreground transition-all",
         collapsed ? "mx-auto" : ""
@@ -23,7 +27,7 @@ export function SidebarBrand({ collapsed = false }: SidebarBrandProps) {
       {!collapsed && (
         <div className="flex flex-col">
           <span className="text-lg font-bold tracking-tight">URL Shortener</span>
-          <span className="text-xs text-muted-foreground">Admin Panel</span>
+          <span className="text-xs text-muted-foreground">{subtitle}</span>
         </div>
       )}
     </Link>
