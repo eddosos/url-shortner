@@ -10,9 +10,10 @@ import { SidebarToggle } from './SidebarToggle'
 
 interface SidebarProps {
   className?: string
+  mode?: 'admin' | 'user'
 }
 
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ className, mode = 'admin' }: SidebarProps) {
   const { collapsed } = useSidebarStore()
 
   return (
@@ -28,7 +29,7 @@ export function Sidebar({ className }: SidebarProps) {
       <div className="flex flex-col h-full">
         {/* Brand */}
         <div className="flex items-center justify-between px-3 py-3 border-b">
-          <SidebarBrand collapsed={collapsed} />
+          <SidebarBrand collapsed={collapsed} mode={mode} />
           {!collapsed && <SidebarToggle />}
         </div>
 
@@ -36,10 +37,10 @@ export function Sidebar({ className }: SidebarProps) {
         <SidebarSearch collapsed={collapsed} />
 
         {/* Navigation */}
-        <SidebarNav collapsed={collapsed} />
+        <SidebarNav collapsed={collapsed} mode={mode} />
 
         {/* Quick Actions */}
-        <QuickActions collapsed={collapsed} />
+        <QuickActions collapsed={collapsed} mode={mode} />
 
         {/* Mobile Toggle */}
         {collapsed && (

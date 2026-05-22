@@ -5,8 +5,8 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard - URL Shortener",
-  description: "Admin panel for URL Shortener SaaS application",
+  title: "URL Shortener - Dashboard & Admin",
+  description: "URL Shortener SaaS application with user dashboard and admin panel",
 }
 
 export default function RootLayout({

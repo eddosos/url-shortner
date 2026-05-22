@@ -3,17 +3,21 @@
 import Link from 'next/link'
 import * as LucideIcons from 'lucide-react'
 import { quickActions } from './menuConfig'
+import { userQuickActions } from './userMenuConfig'
 import { cn } from '@/lib/utils'
 
 interface QuickActionsProps {
   collapsed?: boolean
+  mode?: 'admin' | 'user'
 }
 
-export function QuickActions({ collapsed = false }: QuickActionsProps) {
+export function QuickActions({ collapsed = false, mode = 'admin' }: QuickActionsProps) {
+  const actions = mode === 'admin' ? quickActions : userQuickActions
+  
   if (collapsed) {
     return (
       <div className="p-3 border-t">
-        {quickActions.slice(0, 2).map((action) => {
+        {actions.slice(0, 2).map((action) => {
           const IconComponent = (LucideIcons as any)[action.icon] || LucideIcons.Circle
           return (
             <Link
@@ -36,7 +40,7 @@ export function QuickActions({ collapsed = false }: QuickActionsProps) {
         Quick Actions
       </h3>
       <div className="grid grid-cols-2 gap-1">
-        {quickActions.map((action) => {
+        {actions.map((action) => {
           const IconComponent = (LucideIcons as any)[action.icon] || LucideIcons.Circle
           return (
             <Link
