@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { useSidebarStore } from '@/store/useSidebarStore'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import * as LucideIcons from 'lucide-react'
+import Link from 'next/link'
 
 function StatCard({ title, value, change, icon: iconName, trend }: any) {
   const IconComponent = (LucideIcons as any)[iconName] || LucideIcons.Circle
@@ -41,6 +42,12 @@ export default function AdminDashboard() {
         <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
           <h1 className="text-lg font-semibold">Dashboard</h1>
           <div className="ml-auto flex items-center gap-4">
+            <Link href="/user/dashboard">
+              <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
+                <LucideIcons.Users className="w-4 h-4" />
+                <span>View as User</span>
+              </button>
+            </Link>
             <button className="p-2 text-muted-foreground hover:text-foreground">
               <LucideIcons.Bell className="w-5 h-5" />
             </button>

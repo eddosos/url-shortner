@@ -6,15 +6,12 @@ node_modules/
 dist/
 build/
 .next/
-.nuxt/
-public/dist/
-release/
+out/
 
 # Environment variables
 .env
 .env.local
 .env.*
-!.env.example
 
 # IDE specific
 .vscode/
@@ -22,17 +19,8 @@ release/
 *.swp
 *.swo
 
-# OS generated
-.DS_Store
-Thumbs.db
-
 # Logs
 *.log
-
-# Coverage reports
-coverage/
-htmlcov/
-*.coverage
 
 # Python specific
 __pycache__/
@@ -43,28 +31,22 @@ __pycache__/
 env/
 venv/
 .venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.nox/
-
-# Node specific
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-node_modules/
-jspm_packages/
-
-# TypeScript
-*.tsbuildinfo
-.next/
-.nuxt/
-dist/
+.ENV
 
 # Temporary files
 *.tmp
-*.temp
+*~
 .DS_Store
 Thumbs.db
+
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# Cache directories
+.cache/
+.mypy_cache/
+.pytest_cache/
+.nyc_output/
 ```
