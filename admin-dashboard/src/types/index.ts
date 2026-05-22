@@ -8,6 +8,13 @@ export interface MenuItem {
   roles?: string[]
 }
 
+export interface MenuSection {
+  label: string
+  afterItem: string
+  items: MenuItem[]
+  isCollapsible?: boolean
+}
+
 export interface SidebarState {
   collapsed: boolean
   activeItem: string

@@ -5,15 +5,25 @@ import * as LucideIcons from 'lucide-react'
 import { quickActions } from './menuConfig'
 import { cn } from '@/lib/utils'
 
-interface QuickActionsProps {
-  collapsed?: boolean
+interface QuickActionItem {
+  id: string
+  title: string
+  icon: string
+  href: string
 }
 
-export function QuickActions({ collapsed = false }: QuickActionsProps) {
+interface QuickActionsProps {
+  collapsed?: boolean
+  actions?: QuickActionItem[]
+}
+
+export function QuickActions({ collapsed = false, actions }: QuickActionsProps) {
+  const quickActionsList = actions || quickActions
+  
   if (collapsed) {
     return (
       <div className="p-3 border-t">
-        {quickActions.slice(0, 2).map((action) => {
+        {quickActionsList.slice(0, 2).map((action) => {
           const IconComponent = (LucideIcons as any)[action.icon] || LucideIcons.Circle
           return (
             <Link
@@ -36,7 +46,7 @@ export function QuickActions({ collapsed = false }: QuickActionsProps) {
         Quick Actions
       </h3>
       <div className="grid grid-cols-2 gap-1">
-        {quickActions.map((action) => {
+        {quickActionsList.map((action) => {
           const IconComponent = (LucideIcons as any)[action.icon] || LucideIcons.Circle
           return (
             <Link
